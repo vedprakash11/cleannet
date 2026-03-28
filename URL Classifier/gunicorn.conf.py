@@ -1,16 +1,20 @@
 """
 Gunicorn configuration. Override via environment variables on EC2.
 
-    GUNICORN_BIND=0.0.0.0:5000
-    GUNICORN_WORKERS=2
-    GUNICORN_TIMEOUT=120
+Production (behind Nginx): bind only to localhost so port 5000 is not exposed.
 
-Each worker loads the sklearn model — use a small worker count on small instances.
+    export GUNICORN_BIND=127.0.0.1:5000
+    export GUNICORN_WORKERS=4
+    gunicorn -c gunicorn.conf.py wsgi:app
+
+Direct exposure (not recommended): GUNICORN_BIND=0.0.0.0:5000
+
+Each worker loads the sklearn model — lower GUNICORN_WORKERS on small instances.
 """
 
 import os
 
-bind = os.environ.get("GUNICORN_BIND", "0.0.0.0:5000")
+bind = os.environ.get("GUNICORN_BIND", "127.0.0.1:5000")
 workers = int(os.environ.get("GUNICORN_WORKERS", "2"))
 timeout = int(os.environ.get("GUNICORN_TIMEOUT", "120"))
 worker_class = "sync"

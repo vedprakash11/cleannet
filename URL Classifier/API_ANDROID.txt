@@ -1,12 +1,13 @@
 CleanNet Android ↔ Flask API
 ==============================
 
-**Default (physical phone, same Wi‑Fi):** leave ``classifier_api_endpoint`` **empty**.
-The app sends a UDP broadcast; the PC running ``python app.py`` replies with
-``http://<auto-detected-LAN-IP>:<port>/v1/classify``. No manual IP in the app.
+**CleanNet repo default (Nginx on port 80):** ``classifier_api_endpoint`` =
+``http://13.233.212.50/v1/classify`` (no ``:5000`` — Gunicorn is behind Nginx).
+Edit the IP in ``strings.xml`` if your public IPv4 differs.
 
-Optional override: set ``classifier_api_endpoint`` to a full POST URL if you
-disable discovery or use an emulator (see below).
+**Same Wi‑Fi / local PC:** set ``classifier_api_endpoint`` to **empty** to use UDP
+discovery, or set it to ``http://<LAN-IP>:5000/v1/classify`` / emulator
+``http://10.0.2.2:5000/v1/classify``.
 
 Endpoint:
   POST http://<host>:<port>/v1/classify
@@ -33,11 +34,10 @@ App toggles:
   client IP, URL, class, layer, confidence, app label.
   Logger ``url_classifier.android_api`` also records the same fields.
 
-**AWS EC2 (Linux) / public server**
-  UDP discovery does **not** reach the cloud. Set ``classifier_api_endpoint`` to your
-  public API URL, e.g. ``https://your-domain.com/v1/classify``.
-  Run with **Gunicorn**: ``gunicorn -c gunicorn.conf.py wsgi:app`` (see ``DEPLOY_EC2.md``).
-  Health: ``GET /health``. Set ``CLEANNET_DISCOVERY=0`` on the server.
+**AWS EC2 production:** Gunicorn + Nginx (see ``DEPLOY_EC2.md``). Do not expose
+  Flask or Gunicorn on :5000 publicly — Nginx listens on **80**, proxies to
+  **127.0.0.1:5000**. Android: ``http://<ec2-ip>/v1/classify``. ``TRUST_PROXY=1``,
+  ``CLEANNET_DISCOVERY=0``.
 
 Response JSON:
   label       — "adult" or "safe" (what the Android client uses to block)
