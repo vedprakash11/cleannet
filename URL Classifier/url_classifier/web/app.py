@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 from flask import Flask, Response, abort, jsonify, redirect, render_template, request, url_for
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from url_classifier.classification.classifier import classify_url, load_classifier_bundle
 from url_classifier.images.image_nsfw import load_page_bundle
@@ -16,6 +17,12 @@ app = Flask(
     __name__,
     template_folder=str(_WEB_DIR / "templates"),
 )
+
+# Behind nginx / AWS ALB: set TRUST_PROXY=1 so client IP and scheme are correct.
+if os.environ.get("TRUST_PROXY", "").lower() in ("1", "true", "yes"):
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
 
 # In-memory JPEG cache for upload previews (avoids huge data: URLs in HTML).
 PREVIEW_CACHE: OrderedDict[str, bytes] = OrderedDict()
@@ -73,6 +80,12 @@ def _empty_template_kwargs():
         "image_result": None,
         "classification_trace": None,
     }
+
+
+@app.route("/health")
+def health():
+    """Load balancer / ops probe (GET)."""
+    return jsonify({"status": "ok", "service": "url-classifier"})
 
 
 @app.errorhandler(413)

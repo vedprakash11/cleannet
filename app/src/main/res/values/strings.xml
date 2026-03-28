@@ -9,7 +9,7 @@
     <string name="dns_vpn_notification_title">CleanNet DNS filter</string>
     <string name="dns_vpn_notification_text">Blocking DNS for filtered domains</string>
     <string name="dns_vpn_stop">Stop</string>
-    <!-- Optional: full POST URL to /v1/classify. Leave empty to auto-find the PC on the same Wi‑Fi. -->
+    <!-- Optional: full POST URL to /v1/classify. Empty = same Wi‑Fi UDP discovery. Cloud (EC2): set https://your-host/v1/classify -->
     <string name="classifier_api_endpoint" translatable="false"></string>
     <!-- Optional Bearer token for the classifier API. -->
     <string name="classifier_api_key" translatable="false"></string>

@@ -33,6 +33,12 @@ App toggles:
   client IP, URL, class, layer, confidence, app label.
   Logger ``url_classifier.android_api`` also records the same fields.
 
+**AWS EC2 (Linux) / public server**
+  UDP discovery does **not** reach the cloud. Set ``classifier_api_endpoint`` to your
+  public API URL, e.g. ``https://your-domain.com/v1/classify``.
+  Run with **Gunicorn**: ``gunicorn -c gunicorn.conf.py wsgi:app`` (see ``DEPLOY_EC2.md``).
+  Health: ``GET /health``. Set ``CLEANNET_DISCOVERY=0`` on the server.
+
 Response JSON:
   label       — "adult" or "safe" (what the Android client uses to block)
   class       — original prediction (safe, adult, phishing, malware, ...)
