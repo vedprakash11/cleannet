@@ -1,0 +1,22 @@
+# CleanNet — domain blocklist (hosts format: one hostname per line)
+# Lines starting with # are ignored. Plain domain or: 0.0.0.0 hostname
+#
+# === Public lists (maintain / refresh from here) ===
+# StevenBlack hosts — consolidates many sources; optional porn/social/etc. extensions
+#   Repo: https://github.com/StevenBlack/hosts
+#
+# Suggested raw files (download and merge into this file, or save as files/blocklist_domains.txt):
+#   • Porn-only (~76k domains):
+#     https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn-only/hosts
+#   • Unified + porn (~164k):
+#     https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts
+#   • Base unified adware+malware (~87k):
+#     https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+# Non-GitHub mirror (e.g. some download managers):
+#   http://sbc.io/hosts/alternates/porn-only/hosts
+#
+# Keywords are in assets/blocklist_keywords.json (edit or replace for OTA-style updates).
+
+# Safe examples (reserved TLDs — pipeline tests)
+blocked.example
+malicious.test

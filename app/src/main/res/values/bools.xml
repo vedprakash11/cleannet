@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- When true, classifies via Flask API (auto-discovery on same Wi‑Fi, or override in strings). -->
+    <bool name="classifier_api_enabled">true</bool>
+</resources>

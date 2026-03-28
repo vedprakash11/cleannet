@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Classifier</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --card: #1a2332;
+            --text: #e7ecf3;
+            --muted: #8b9bb4;
+            --border: #2d3a4d;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: min(920px, 100%);
+            width: 100%;
+            box-shadow: 0 12px 40px rgba(0,0,0,.35);
+        }
+        h1 {
+            margin: 0 0 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        p.sub { color: var(--muted); margin: 0 0 1.5rem; font-size: 0.9rem; }
+        form { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0d1117;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        button {
+            padding: 0.65rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover { background: #1d4ed8; }
+        .result { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+        .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.75rem; }
+        .badge-rule { display: inline-block; background: #334155; color: #cbd5e1; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem; }
+        .badge-layer { display: inline-block; background: #1e3a5f; color: #93c5fd; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.35rem; }
+        .preview-section { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+        .preview-section h4 { margin: 0 0 0.75rem; font-size: 0.95rem; font-weight: 600; color: var(--text); }
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.65rem; }
+        .preview-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0d1117;
+        }
+        .preview-item img { width: 100%; height: 120px; object-fit: cover; display: block; vertical-align: middle; }
+        .preview-item a {
+            display: block; padding: 0.35rem 0.4rem; font-size: 0.68rem; color: var(--muted);
+            word-break: break-all; text-decoration: none; border-top: 1px solid var(--border);
+        }
+        .preview-item a:hover { color: #93c5fd; }
+        .upload-section { margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+        .section-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.75rem; color: var(--text); }
+        .upload-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+        .upload-form input[type="file"] {
+            flex: 1;
+            min-width: 200px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        .upload-result { margin-top: 1.25rem; padding: 1rem 1rem 0.5rem; border-radius: 8px; background: #0d1117; border: 1px solid var(--border); }
+        .preview-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; align-items: start; }
+        @media (max-width: 720px) { .preview-pair { grid-template-columns: 1fr; } }
+        .preview-col .preview-label { margin: 0 0 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+        .upload-preview-wrap { margin: 0; max-width: 100%; }
+        .upload-preview { width: 100%; max-height: 380px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); }
+        .det-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.75rem; }
+        .det-table th, .det-table td { border: 1px solid var(--border); padding: 0.4rem 0.5rem; text-align: left; }
+        .det-table th { background: #111820; color: var(--muted); font-weight: 600; }
+        .det-table code { font-size: 0.8rem; }
+        .trace-section { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+        .trace-section h4 { margin: 0 0 0.5rem; font-size: 0.95rem; font-weight: 600; color: var(--text); }
+        .trace-log {
+            margin: 0; padding: 0.85rem 1rem; background: #0d1117; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 0.78rem; line-height: 1.45; color: #c8d1e0;
+            white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, Consolas, monospace;
+            max-height: 28rem; overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>URL Classifier</h1>
+        <p class="sub">URL pipeline: lexical → domain DB → optional page images (NudeNet) → HTML text → ML. Or upload an image below for local NudeNet detection.</p>
+
+        <form method="POST" action="/">
+            <input type="text" name="url" placeholder="https://example.com/path" autocomplete="off" value="{{ request.form.url or '' }}">
+            <button type="submit">Check URL</button>
+        </form>
+
+        <div class="upload-section">
+            <h2 class="section-title">Image classification (NudeNet)</h2>
+            <p class="meta" style="margin-top:0">Upload a JPG, PNG, WebP, or GIF. Processing is local; do not upload images you are not allowed to use.</p>
+            <form method="POST" action="{{ url_for('classify_image_upload') }}" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" required>
+                <button type="submit">Classify image</button>
+            </form>
+        </div>
+
+        {% if image_result %}
+        <div class="upload-result">
+            {% if image_result.ok %}
+                <h3 class="section-title" style="margin-top:0">Upload result</h3>
+                <p class="meta">File: <code>{{ image_result.filename }}</code></p>
+                {% if image_result.summary_label == "adult" %}
+                    <h3 style="color:#ef4444;margin:0.5rem 0 0;">Adult / explicit signal <span class="badge-layer">nudenet</span></h3>
+                {% elif image_result.summary_label == "review" %}
+                    <h3 style="color:#fbbf24;margin:0.5rem 0 0;">Review <span class="badge-layer">nudenet</span></h3>
+                {% else %}
+                    <h3 style="color:#22c55e;margin:0.5rem 0 0;">No strong explicit match <span class="badge-layer">nudenet</span></h3>
+                {% endif %}
+                <p class="meta">{{ image_result.summary_text }}</p>
+                <p class="meta">Explicit-region max score: <strong>{{ "%.3f"|format(image_result.max_explicit) }}</strong> (threshold {{ "%.2f"|format(image_result.threshold) }})</p>
+                {% if image_result.preview_original_url %}
+                <div class="preview-pair">
+                    <div class="preview-col">
+                        <h5 class="preview-label">Uploaded image (resized)</h5>
+                        <div class="upload-preview-wrap">
+                            <img src="{{ image_result.preview_original_url }}" alt="Original upload" class="upload-preview" width="520" height="380" decoding="async">
+                        </div>
+                    </div>
+                    {% if image_result.preview_marked_url %}
+                    <div class="preview-col">
+                        <h5 class="preview-label">NSFW / sensitive areas marked</h5>
+                        <div class="upload-preview-wrap">
+                            <img src="{{ image_result.preview_marked_url }}" alt="Regions marked by NudeNet" class="upload-preview" width="520" height="380" decoding="async">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if image_result.preview_legend %}
+                <p class="meta" style="margin-top:0.75rem;">{{ image_result.preview_legend }}</p>
+                {% endif %}
+                {% elif image_result.ok %}
+                <p class="meta" style="margin-top:0.75rem;">Preview unavailable (install Pillow and ensure the image decodes).</p>
+                {% endif %}
+                {% if image_result.detections %}
+                <table class="det-table">
+                    <thead><tr><th>Class</th><th>NSFW</th><th>Score</th><th>Box [x,y,w,h]</th></tr></thead>
+                    <tbody>
+                    {% for d in image_result.detections %}
+                        <tr>
+                            <td><code>{{ d['class'] }}</code></td>
+                            <td>{% if d['explicit'] %}<span style="color:#f87171;">Yes</span>{% else %}<span style="color:#fbbf24;">Other</span>{% endif %}</td>
+                            <td>{{ "%.4f"|format(d['score']) }}</td>
+                            <td><code style="font-size:0.75rem;">{{ d['box'] }}</code></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="meta">No bounding boxes above the model display threshold.</p>
+                {% endif %}
+            {% else %}
+                <h3 class="section-title" style="margin-top:0;color:#f87171;">Image upload error</h3>
+                <p class="meta">{{ image_result.error }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if prediction %}
+        <div class="result">
+            {% if prediction == "safe" %}
+                <h3 style="color:#22c55e;margin:0;">Safe <span aria-hidden="true">✓</span></h3>
+            {% elif prediction == "adult" %}
+                <h3 style="color:#ef4444;margin:0;">Adult <span aria-hidden="true">🔞</span></h3>
+            {% elif prediction == "phishing" %}
+                <h3 style="color:#f97316;margin:0;">Phishing <span aria-hidden="true">⚠</span></h3>
+            {% elif prediction == "malware" %}
+                <h3 style="color:#a855f7;margin:0;">Malware <span aria-hidden="true">⛓</span></h3>
+            {% else %}
+                <h3 style="margin:0;">{{ prediction }}</h3>
+            {% endif %}
+
+            {% if confidence is not none %}
+                <p style="margin:0.5rem 0 0;color:var(--muted);">
+                    Confidence: <strong style="color:var(--text);">{{ "%.1f"|format(confidence * 100) }}%</strong>
+                    {% if rule_applied %}<span class="badge-rule">rules / reputation</span>{% endif %}
+                    {% if layer %}<span class="badge-layer" title="Decision layer">{{ layer }}</span>{% endif %}
+                </p>
+            {% endif %}
+
+            {% if domain %}
+                <p class="meta">Host: <code style="color:var(--text);">{{ domain }}</code></p>
+            {% endif %}
+            {% if detail %}
+                <p class="meta">{{ detail }}</p>
+            {% endif %}
+
+            {% if keyword_flag %}
+                <p class="meta">Keyword signal: URL contains common risk-related tokens (informational).</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if classification_trace %}
+        <div class="trace-section">
+            <h4>Classification trace</h4>
+            <p class="meta" style="margin-top:0">Step-by-step log for this URL (also printed to the server console).</p>
+            <pre class="trace-log">{% for line in classification_trace %}{{ line }}
+{% endfor %}</pre>
+        </div>
+        {% endif %}
+
+        {% if preview_images %}
+        <div class="preview-section">
+            <h4>Images sampled from page</h4>
+            <p class="meta" style="margin-top:0">Thumbnails of assets linked from the URL ({{ preview_images|length }}). NSFW scoring runs only if ENABLE_IMAGE_NSFW=1.</p>
+            <div class="preview-grid">
+                {% for img in preview_images %}
+                <div class="preview-item">
+                    <img src="{{ img.data_uri|safe }}" alt="" loading="lazy" width="280" height="120">
+                    <a href="{{ img.src }}" target="_blank" rel="noopener noreferrer">{{ img.src }}</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif preview_message %}
+        <div class="preview-section">
+            <h4>Images sampled from page</h4>
+            <p class="meta" style="margin-top:0;color:#fbbf24;">{{ preview_message }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

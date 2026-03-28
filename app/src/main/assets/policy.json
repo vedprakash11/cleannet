@@ -1,0 +1,13 @@
+{
+  "schedule": {
+    "enabled": false,
+    "enforceBlockingOnlyBetweenHours": {
+      "start": 8,
+      "end": 22
+    }
+  },
+  "layers": {
+    "domainBlocklistAndKeywords": true,
+    "mlClassifier": false
+  }
+}

@@ -1,0 +1,40 @@
+CleanNet Android ↔ Flask API
+==============================
+
+**Default (physical phone, same Wi‑Fi):** leave ``classifier_api_endpoint`` **empty**.
+The app sends a UDP broadcast; the PC running ``python app.py`` replies with
+``http://<auto-detected-LAN-IP>:<port>/v1/classify``. No manual IP in the app.
+
+Optional override: set ``classifier_api_endpoint`` to a full POST URL if you
+disable discovery or use an emulator (see below).
+
+Endpoint:
+  POST http://<host>:<port>/v1/classify
+
+Run Flask (from folder ``URL Classifier/``):
+  pip install -r requirements.txt
+  python app.py
+
+  Listens on **0.0.0.0** (port **5000** by default). UDP **45322** answers discovery.
+  Env: ``PORT``, ``HOST``, ``CLEANNET_DISCOVERY=0`` to turn off UDP discovery.
+
+**Windows firewall:** allow inbound **TCP** (Flask port, e.g. 5000) and **UDP** 45322:
+    netsh advfirewall firewall add rule name="Flask CleanNet TCP" dir=in action=allow protocol=TCP localport=5000
+    netsh advfirewall firewall add rule name="CleanNet discovery UDP" dir=in action=allow protocol=UDP localport=45322
+
+Android **emulator** (UDP to the host is unreliable): set
+  ``classifier_api_endpoint`` = ``http://10.0.2.2:5000/v1/classify``
+
+App toggles:
+  ``bools.xml`` → ``classifier_api_enabled`` (default **true** in repo)
+  ``strings.xml`` → ``classifier_api_endpoint`` (empty = auto-discover)
+
+**CMD / PowerShell** — each classify request prints a bordered block with:
+  client IP, URL, class, layer, confidence, app label.
+  Logger ``url_classifier.android_api`` also records the same fields.
+
+Response JSON:
+  label       — "adult" or "safe" (what the Android client uses to block)
+  class       — original prediction (safe, adult, phishing, malware, ...)
+  layer       — which rule layer decided (lexical_rule, domain_registry, ml, ...)
+  confidence  — 0..1

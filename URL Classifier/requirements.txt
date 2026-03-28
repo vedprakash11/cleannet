@@ -1,0 +1,9 @@
+flask>=3.0.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+requests>=2.28.0
+python-whois>=0.8.0
+beautifulsoup4>=4.12.0
+nudenet>=3.0.0
+Pillow>=10.0.0

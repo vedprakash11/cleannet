@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">CleanNet</string>
+    <string name="url_hint">Enter URL</string>
+    <string name="go">Go</string>
+    <string name="blocked_content">Blocked Content 🚫</string>
+    <string name="invalid_url">Invalid URL</string>
+    <string name="dns_vpn_start">Start DNS filter (VPN)</string>
+    <string name="dns_vpn_channel_name">DNS filter</string>
+    <string name="dns_vpn_notification_title">CleanNet DNS filter</string>
+    <string name="dns_vpn_notification_text">Blocking DNS for filtered domains</string>
+    <string name="dns_vpn_stop">Stop</string>
+    <!-- Optional: full POST URL to /v1/classify. Leave empty to auto-find the PC on the same Wi‑Fi. -->
+    <string name="classifier_api_endpoint" translatable="false"></string>
+    <!-- Optional Bearer token for the classifier API. -->
+    <string name="classifier_api_key" translatable="false"></string>
+    <string name="classifier_unavailable">Classifier unavailable</string>
+</resources>
