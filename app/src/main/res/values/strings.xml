@@ -10,7 +10,7 @@
     <string name="dns_vpn_notification_text">Blocking DNS for filtered domains</string>
     <string name="dns_vpn_stop">Stop</string>
     <!-- EC2: Nginx on port 80 → no :5000 in URL. Edit IP to your public IPv4. -->
-    <string name="classifier_api_endpoint" translatable="false">http://13.233.212.50/v1/classify</string>
+    <string name="classifier_api_endpoint" translatable="false">http://13.233.212.100/v1/classify</string>
     <!-- Optional Bearer token for the classifier API. -->
     <string name="classifier_api_key" translatable="false"></string>
     <string name="classifier_unavailable">Classifier unavailable</string>

@@ -4,8 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=ec2-user
-Group=ec2-user
+# Ubuntu EC2: use User=ubuntu Group=ubuntu. Amazon Linux: ec2-user.
+User=ubuntu
+Group=ubuntu
 WorkingDirectory=/opt/url-classifier
 Environment="PATH=/opt/url-classifier/venv/bin"
 Environment="CLEANNET_DISCOVERY=0"

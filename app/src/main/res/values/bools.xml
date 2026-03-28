@@ -2,4 +2,8 @@
 <resources>
     <!-- When true, classifies via Flask API (auto-discovery on same Wi‑Fi, or override in strings). -->
     <bool name="classifier_api_enabled">true</bool>
+    <!-- Log DNS hostnames to logcat (tag CleanNetDNS) while DNS VPN is on. -->
+    <bool name="dns_monitor_logcat">true</bool>
+    <!-- POST /v1/classify for each new host (throttled); Chrome etc. when DNS goes through VPN. -->
+    <bool name="dns_monitor_remote_classify">true</bool>
 </resources>

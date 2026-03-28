@@ -94,7 +94,53 @@ sudo systemctl restart nginx
 
 ---
 
-## 8. Android app (`classifier_api_endpoint`)
+## 8. Troubleshooting: 502 Bad Gateway (Nginx works, upstream does not)
+
+Nginx returns **502** when it cannot get a valid response from **Gunicorn on `127.0.0.1:5000`**. Usually Gunicorn is **not running**, **crashed on startup**, or is listening on a **different address/port**.
+
+**On the EC2 instance (SSH), run:**
+
+```bash
+# 1) Is anything listening on port 5000?
+ss -tlnp | grep 5000
+curl -sS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:5000/health
+```
+
+- If `curl` fails with “Connection refused”, Gunicorn is not bound to `127.0.0.1:5000`. Start it (see §3) or fix systemd.
+
+**Start Gunicorn in the foreground** to see errors (missing deps, model load failure, wrong path):
+
+```bash
+cd /opt/url-classifier    # must contain wsgi.py, gunicorn.conf.py, url_classifier/
+source venv/bin/activate
+export TRUST_PROXY=1
+export CLEANNET_DISCOVERY=0
+export GUNICORN_BIND=127.0.0.1:5000
+gunicorn -c gunicorn.conf.py wsgi:app
+```
+
+Leave this running, then in another SSH session test `curl http://127.0.0.1:5000/health`. If the first command exits with a Python traceback, fix that (e.g. `pip install -r requirements.txt`, disk space, full clone of the repo including model/data files).
+
+**If you use systemd:**
+
+```bash
+sudo systemctl status cleannet-classifier
+sudo journalctl -u cleannet-classifier -n 80 --no-pager
+```
+
+Check **`WorkingDirectory`** matches the folder that contains `wsgi.py`, and **`User`** can read that tree (Ubuntu AMIs often use `ubuntu`, not `ec2-user`).
+
+**Nginx logs:**
+
+```bash
+sudo tail -50 /var/log/nginx/error.log
+```
+
+**Typical fixes:** start Gunicorn before relying on `/health`; align `proxy_pass http://127.0.0.1:5000` with `GUNICORN_BIND`; ensure the app directory layout matches the repo.
+
+---
+
+## 9. Android app (`classifier_api_endpoint`)
 
 Use the **public URL without `:5000`**:
 
@@ -104,13 +150,13 @@ The repo default in `strings.xml` follows this pattern (edit the IP if yours dif
 
 ---
 
-## 9. HTTPS (recommended later)
+## 10. HTTPS (recommended later)
 
 Use Let’s Encrypt (`certbot`) or terminate TLS on an ALB. See `deploy/ec2/nginx-url-classifier.conf.example` for an HTTPS server block pattern.
 
 ---
 
-## 10. systemd
+## 11. systemd
 
 See `deploy/ec2/cleannet-classifier.service` — set `WorkingDirectory`, `User`, and ensure `Environment` includes `TRUST_PROXY=1` and `GUNICORN_BIND=127.0.0.1:5000`.
 

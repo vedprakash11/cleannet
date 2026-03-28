@@ -2,7 +2,7 @@ CleanNet Android ↔ Flask API
 ==============================
 
 **CleanNet repo default (Nginx on port 80):** ``classifier_api_endpoint`` =
-``http://13.233.212.50/v1/classify`` (no ``:5000`` — Gunicorn is behind Nginx).
+``http://13.233.212.100/v1/classify`` (no ``:5000`` — Gunicorn is behind Nginx).
 Edit the IP in ``strings.xml`` if your public IPv4 differs.
 
 **Same Wi‑Fi / local PC:** set ``classifier_api_endpoint`` to **empty** to use UDP
@@ -29,6 +29,12 @@ Android **emulator** (UDP to the host is unreliable): set
 App toggles:
   ``bools.xml`` → ``classifier_api_enabled`` (default **true** in repo)
   ``strings.xml`` → ``classifier_api_endpoint`` (empty = auto-discover)
+
+**System-wide DNS monitoring (Chrome, other apps):** start **DNS filter (VPN)** in the app.
+  Hostnames resolved via UDP/53 through the tunnel are logged (tag ``CleanNetDNS``) and
+  optionally sent to ``/v1/classify`` as ``https://<host>/`` (see ``dns_monitor_*`` in
+  ``bools.xml``). This is **hostname-only**, not full URLs. **Private DNS** / DoH may
+  bypass the VPN path.
 
 **CMD / PowerShell** — each classify request prints a bordered block with:
   client IP, URL, class, layer, confidence, app label.

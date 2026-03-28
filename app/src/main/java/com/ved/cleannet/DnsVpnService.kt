@@ -184,6 +184,8 @@ class DnsVpnService : VpnService() {
         val dns = packet.copyOfRange(payloadOff, payloadOff + dnsLen)
         val host = IpDnsPacket.dnsQueryHostname(dns, dnsLen) ?: return
 
+        GlobalDnsMonitor.onDnsHostname(applicationContext, host)
+
         if (PolicyEngine.shouldBlockHost(host)) {
             val nx = IpDnsPacket.buildNxdomainFromQuery(dns, dnsLen)
             val reply = IpDnsPacket.buildIpv4UdpDnsReply(packet, nx, nx.size)
